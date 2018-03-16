@@ -339,11 +339,17 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
                 self.pagination_config.get('more_option', "more\n")
             )
         )
+
+        self.pagination_more_option_value = self.pagination_config.get('more_option_value', "98")
+
         self.pagination_back_option = self._add_end_line(
             self.get_text(
                 self.pagination_config.get('back_option', "back\n")
             )
         )
+
+        self.pagination_back_option_value = self.pagination_config.get('back_option_value', "00")
+
         self.ussd_text_limit = self.pagination_config.\
             get("ussd_text_limit", ussd_airflow_variables.ussd_text_limit)
 

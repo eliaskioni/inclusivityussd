@@ -209,11 +209,11 @@ class MenuScreen(UssdHandlerAbstract):
             if len(pages) > 0:
                 text += "{back_option_value}. {back_option}".format(
                     back_option=self.pagination_back_option,
-                    back_option_value=self.pagination_config.get('back_option_value', "00")
+                    back_option_value=self.pagination_back_option_value
                 )
             text += "{more_option_value}. {more_option}".format(
                 more_option=self.pagination_more_option,
-                more_option_value=self.pagination_config.get('back_option_value', "98")
+                more_option_value=self.pagination_more_option_value
             )
 
             # update ussd_text_limit to the one that considers pages
@@ -243,7 +243,7 @@ class MenuScreen(UssdHandlerAbstract):
         if len(pages) > 0:
             text += "{back_option_value}. {back_option}".format(
                 back_option=self.pagination_back_option,
-                back_option_value=self.pagination_config.get('back_option_value', "00")
+                back_option_value=self.pagination_back_option_value
             )
 
         if not options:
@@ -256,7 +256,7 @@ class MenuScreen(UssdHandlerAbstract):
         # detect if there might be more optoins
         text += "{more_option_value}. {more_option}".format(more_option=
                                            self.pagination_more_option,
-                                           more_option_value=self.pagination_config.get('more_option_value', "98")
+                                           more_option_value=self.pagination_more_option_value
                                            ) \
             if len(ussd_text_cadidate) > self.get_text_limit() - len(text) \
             else ''
@@ -275,16 +275,17 @@ class MenuScreen(UssdHandlerAbstract):
 
     def handle_ussd_input(self, ussd_input):
         # check if input is for previous or next page
-        if self.ussd_request.input.strip() in (self.pagination_config.get('more_option_value', "98"), self.pagination_config.get('back_option_value', "00")):
+        if self.ussd_request.input.strip() in (self.pagination_more_option_value,
+                                               self.pagination_back_option_value):
             page = self.paginator.page(
                 self.ussd_request.session['_ussd_state']['page']
             )
-            if self.ussd_request.input.strip() == self.pagination_config.get('more_option_value', "98") and page.has_next():
+            if self.ussd_request.input.strip() == self.pagination_more_option_value and page.has_next():
                 new_page_number = page.next_page_number()
                 self.ussd_request.session['_ussd_state']['page'] = \
                     new_page_number
                 return UssdResponse(self._render_django_page(new_page_number))
-            elif self.ussd_request.input.strip() == self.pagination_config.get('more_option_value', "00") and \
+            elif self.ussd_request.input.strip() == self.pagination_back_option_value and \
                     page.has_previous():
                 new_page_number = page.previous_page_number()
                 self.ussd_request.session['_ussd_state']['page'] = \
