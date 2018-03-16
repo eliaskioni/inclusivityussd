@@ -207,10 +207,13 @@ class MenuScreen(UssdHandlerAbstract):
             # Lets create pages
             text = ""
             if len(pages) > 0:
-                text += "00. {back_option}".format(
-                    back_option=self.pagination_back_option)
-            text += "98. {more_option}".format(
-                more_option=self.pagination_more_option
+                text += "{back_option_value}. {back_option}".format(
+                    back_option=self.pagination_back_option,
+                    back_option_value=self.pagination_config.get('back_option_value', "00")
+                )
+            text += "{more_option_value}. {more_option}".format(
+                more_option=self.pagination_more_option,
+                more_option_value=self.pagination_config.get('back_option_value', "98")
             )
 
             # update ussd_text_limit to the one that considers pages
@@ -238,8 +241,10 @@ class MenuScreen(UssdHandlerAbstract):
         # Todo use back off strategy to generate the pages
         text = ""
         if len(pages) > 0:
-            text += "00. {back_option}".format(
-                back_option=self.pagination_back_option)
+            text += "{back_option_value}. {back_option}".format(
+                back_option=self.pagination_back_option,
+                back_option_value=self.pagination_config.get('back_option_value', "00")
+            )
 
         if not options:
             pages.append(
@@ -249,8 +254,10 @@ class MenuScreen(UssdHandlerAbstract):
 
         ussd_text_cadidate = ussd_text + options[0].text
         # detect if there might be more optoins
-        text += "98. {more_option}".format(more_option=
-                                           self.pagination_more_option) \
+        text += "{more_option_value}. {more_option}".format(more_option=
+                                           self.pagination_more_option,
+                                           more_option_value=self.pagination_config.get('more_option_value', "98")
+                                           ) \
             if len(ussd_text_cadidate) > self.get_text_limit() - len(text) \
             else ''
         if len(ussd_text_cadidate) <= self.get_text_limit() - len(text):
@@ -268,16 +275,16 @@ class MenuScreen(UssdHandlerAbstract):
 
     def handle_ussd_input(self, ussd_input):
         # check if input is for previous or next page
-        if self.ussd_request.input.strip() in ("98", "00"):
+        if self.ussd_request.input.strip() in (self.pagination_config.get('more_option_value', "98"), self.pagination_config.get('back_option_value', "00")):
             page = self.paginator.page(
                 self.ussd_request.session['_ussd_state']['page']
             )
-            if self.ussd_request.input.strip() == "98" and page.has_next():
+            if self.ussd_request.input.strip() == self.pagination_config.get('more_option_value', "98") and page.has_next():
                 new_page_number = page.next_page_number()
                 self.ussd_request.session['_ussd_state']['page'] = \
                     new_page_number
                 return UssdResponse(self._render_django_page(new_page_number))
-            elif self.ussd_request.input.strip() == '00' and \
+            elif self.ussd_request.input.strip() == self.pagination_config.get('more_option_value', "00") and \
                     page.has_previous():
                 new_page_number = page.previous_page_number()
                 self.ussd_request.session['_ussd_state']['page'] = \
